@@ -13,7 +13,6 @@ WIDTH = 500
 HEIGHT = 600
 
 
-
 #遊戲初始化跟創建視窗
 pygame.init()
 pygame.mixer.init()
@@ -22,13 +21,17 @@ pygame.display.set_caption("第一個遊戲")
 clock = pygame.time.Clock()
 
 #載入圖片
-background_img = pygame.image.load(os.path.join("img", "background.png")).convert()
-player_img = pygame.image.load(os.path.join("img", "player.png")).convert()
+background_img = pygame.image.load(os.path.join("img1", "background.jpg")).convert()
+player_img = pygame.image.load(os.path.join("img1", "player.png")).convert()
 #rock_img = pygame.image.load(os.path.join("img", "rock.png")).convert()
-bullet_img = pygame.image.load(os.path.join("img", "bullet.png")).convert()
-rock_imgs = []
+bullet_img = pygame.image.load(os.path.join("img1", "bullet.png")).convert()
+duck_imgs = []
 for i in range(7):
-    rock_imgs.append(pygame.image.load(os.path.join("img", f"rock{i}.png")).convert())
+    duck_imgs.append(pygame.image.load(os.path.join("img1", f"duck{i}.png")).convert())
+doctorpan_imgs = []
+for i in range(3):
+    doctorpan_imgs.append(pygame.image.load(os.path.join("img1", f"doctorpan{i}.jpg")).convert())
+
 
 #載入音樂
 shoot_sound = pygame.mixer.Sound(os.path.join("sound", "shoot.wav"))
@@ -49,10 +52,15 @@ def draw_text(surf, text, size, x, y):
     text_rect.top = y
     surf.blit(text_surface, text_rect)
 
-def new_rock():
-    r = Rock()
-    all_sprites.add(r)
-    rocks.add(r)
+def new_duck():
+    d = Duck()
+    all_sprites.add(d)
+    ducks.add(d)
+
+def new_doctorpan():
+    dr = DoctorPan()
+    all_sprites.add(dr)
+    doctorpans.add(dr)
 
 def draw_health(surf, hp, x, y):
     if hp < 0:
@@ -67,13 +75,11 @@ def draw_health(surf, hp, x, y):
 
 
 
-
-
 class Player(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.transform.scale(player_img, (50, 38))
-        self.image.set_colorkey(BLACK)
+        self.image = pygame.transform.scale(player_img, (60, 42))
+        self.image.set_colorkey(WHITE)
         self.rect = self.image.get_rect()
         self.radius = 20
         self.rect.centerx = WIDTH/2
@@ -99,18 +105,52 @@ class Player(pygame.sprite.Sprite):
         shoot_sound.play()
 
 
-class Rock(pygame.sprite.Sprite):
+class Duck(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
-        self.image_ori = random.choice(rock_imgs)
+        self.image_ori = random.choice(duck_imgs)
         self.image_ori.set_colorkey(BLACK)
         self.image = self.image_ori.copy()
         self.rect = self.image.get_rect()
         self.radius = int(self.rect.width * 0.85/2)
         self.rect.x = random.randrange(0, WIDTH - self.rect.width)
         self.rect.y = random.randrange(-180, -100)
-        self.speedy = random.randrange(3, 6)
-        self.speedx = random.randrange(-4,4)
+        self.speedy = random.randrange(4, 8)
+        self.speedx = random.randrange(-5,10)
+        self.total_degree = 0
+        self.rot_degree = random.randrange(-3, 3)
+
+    def rotate(self):
+        self.total_degree += self.rot_degree
+        self.total_degree = self.total_degree % 360
+        self.image = pygame.transform.rotate(self.image_ori, self.total_degree)
+        center = self.rect.center
+        self.rect = self.image.get_rect()
+        self.rect.center = center
+
+
+    def update(self):
+        self.rotate()
+        self.rect.y += self.speedy
+        self.rect.x += self.speedx
+        if self.rect.top > HEIGHT or self.rect.left > WIDTH or self.rect.right < 0:
+            self.rect.x = random.randrange(0, WIDTH - self.rect.width)
+            self.rect.y = random.randrange(-100, -40)
+            self.speedy = random.randrange(2, 10)
+            self.speedx = random.randrange(-3, 3)
+
+class DoctorPan(pygame.sprite.Sprite):
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+        self.image_ori = random.choice(doctorpan_imgs)
+        self.image_ori.set_colorkey(BLACK)
+        self.image = self.image_ori.copy()
+        self.rect = self.image.get_rect()
+        self.radius = int(self.rect.width * 0.85/2)
+        self.rect.x = random.randrange(0, WIDTH - self.rect.width)
+        self.rect.y = random.randrange(-180, -100)
+        self.speedy = random.randrange(4, 8)
+        self.speedx = random.randrange(-5,10)
         self.total_degree = 0
         self.rot_degree = random.randrange(-3, 3)
 
@@ -135,7 +175,6 @@ class Rock(pygame.sprite.Sprite):
 
 
 
-
 class Bullet(pygame.sprite.Sprite):
     def __init__(self, x, y):
         pygame.sprite.Sprite.__init__(self)
@@ -155,20 +194,20 @@ class Bullet(pygame.sprite.Sprite):
 
 
 all_sprites = pygame.sprite.Group()
-rocks = pygame.sprite.Group()
+ducks = pygame.sprite.Group()
 bullets = pygame.sprite.Group()
-
+doctorpans = pygame.sprite.Group()
 
 
 player = Player()
 all_sprites.add(player)
-for i in range(10):
-    new_rock()
+for i in range(12):
+    new_duck()
+for i in range(2):
+    new_doctorpan()
 
 score = 0
 pygame.mixer.music.play(-1)
-
-
 
 
 #遊戲迴圈
@@ -185,18 +224,30 @@ while running:
 
     #更新遊戲
     all_sprites.update()
-    hits = pygame.sprite.groupcollide(rocks, bullets, True, True)
+    hits = pygame.sprite.groupcollide(ducks, bullets, True, True)
     for hit in hits:
         random.choice(expl_sounds).play()
         score += hit.radius
-        new_rock()
+        new_duck()
 
-    hits = pygame.sprite.spritecollide(player, rocks, True, pygame.sprite.collide_circle)
+    hits = pygame.sprite.groupcollide(doctorpans, bullets, True, True)
     for hit in hits:
-        new_rock()
+        random.choice(expl_sounds).play()
+        score -= hit.radius
+        new_doctorpan()
+        player.health -= hit.radius/5
+        if player.health <= 0:
+            running = False
+
+
+    hits = pygame.sprite.spritecollide(player, ducks, True, pygame.sprite.collide_circle)
+    for hit in hits:
+        new_duck()
         player.health -= hit.radius
         if player.health <= 0:
             running = False
+
+
     #畫面顯示
     screen.fill(BLACK)
     screen.blit(background_img, (0,0))
@@ -206,7 +257,5 @@ while running:
     pygame.display.update()
 
 
-
-
-
 pygame.quit()
+
