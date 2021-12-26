@@ -2,11 +2,10 @@ import pygame
 import random
 import os
 
-
 FPS = 60
 WHITE = (255, 255, 255)
 GREEN = (0, 255, 0)
-RED = (255, 0 , 0)
+RED = (255, 0, 0)
 YELLOW = (255, 255, 0)
 BLACK = (0, 0, 0)
 WIDTH = 500
@@ -49,7 +48,7 @@ for i in range(9):
     expl_anim['player'].append(player_expl_img)
 
 power_imgs = {}
-power_imgs['shield'] = pygame.image.load(os.path.join("img", "heart.png")).convert()
+power_imgs['heart'] = pygame.image.load(os.path.join("img", "heart.png")).convert()
 power_imgs['gun'] = pygame.image.load(os.path.join("img", "gun.png")).convert()
 
 
@@ -66,14 +65,32 @@ pygame.mixer.music.load(os.path.join("sound", "background.ogg"))
 pygame.mixer.music.set_volume(0.4)
 
 
-font_name = pygame.font.match_font('arial')
+font_name = os.path.join("font.ttf")
 def draw_text(surf, text, size, x, y):
     font = pygame.font.Font(font_name, size)
-    text_surface = font.render(text, True, WHITE)
+    text_surface = font.render(text, True, BLACK)
     text_rect = text_surface.get_rect()
     text_rect.centerx = x
     text_rect.top = y
     surf.blit(text_surface, text_rect)
+
+def draw_init():
+    screen.blit(background_img, (0, 0))
+    draw_text(screen, '太空生存戰!', 64, WIDTH / 2, HEIGHT / 4)
+    draw_text(screen, 'wasd移動飛船 空白鍵發射子彈~', 22, WIDTH / 2, HEIGHT / 2)
+    draw_text(screen, '按任意鍵開始遊戲!', 18, WIDTH / 2, HEIGHT * 3 / 4)
+    pygame.display.update()
+    waiting = True
+    while waiting:
+        clock.tick(FPS)
+        # 取得輸入
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                return True
+            elif event.type == pygame.KEYUP:
+                waiting = False
+                return False
 
 def new_duck():
     d = Duck()
@@ -115,12 +132,14 @@ class Player(pygame.sprite.Sprite):
         self.rect.centerx = WIDTH/2
         self.rect.bottom = HEIGHT - 10
         self.speedx = 8
+        self.speedy = 8
         self.health = 100
         self.lives = 3
         self.hidden = False
         self.hide_time = 0
         self.gun = 1
         self.gun_time = 0
+
 
     def update(self):
         now = pygame.time.get_ticks()
@@ -138,11 +157,21 @@ class Player(pygame.sprite.Sprite):
             self.rect.x += self.speedx
         if key_pressed[pygame.K_a]:
             self.rect.x -= self.speedx
+        if key_pressed[pygame.K_w]:
+            self.rect.y -= self.speedy
+        if key_pressed[pygame.K_s]:
+            self.rect.y += self.speedy
 
         if self.rect.right > WIDTH:
             self.rect.right = WIDTH
         if self.rect.left < 0:
             self.rect.left = 0
+        if self.rect.bottom > HEIGHT:
+            self.rect.bottom = HEIGHT
+        if self.rect.top < 0:
+            self.rect.top = 0
+
+
 
     def shoot(self):
         if not (self.hidden):
@@ -169,6 +198,8 @@ class Player(pygame.sprite.Sprite):
     def gunup(self):
         self.gun += 1
         self.gun_time = pygame.time.get_ticks()
+
+
 
 
 class Duck(pygame.sprite.Sprite):
@@ -282,7 +313,7 @@ class Explosion(pygame.sprite.Sprite):
 class Power(pygame.sprite.Sprite):
     def __init__(self, center):
         pygame.sprite.Sprite.__init__(self)
-        self.type = random.choice(['shield', 'gun'])
+        self.type = random.choice(['heart', 'gun'])
         self.image = power_imgs[self.type]
         self.image.set_colorkey(BLACK)
         self.rect = self.image.get_rect()
@@ -296,27 +327,30 @@ class Power(pygame.sprite.Sprite):
 
 
 
-all_sprites = pygame.sprite.Group()
-ducks = pygame.sprite.Group()
-bullets = pygame.sprite.Group()
-doctorpans = pygame.sprite.Group()
-powers = pygame.sprite.Group()
 
-
-player = Player()
-all_sprites.add(player)
-for i in range(12):
-    new_duck()
-for i in range(2):
-    new_doctorpan()
-
-score = 0
 pygame.mixer.music.play(-1)
 
 
 #遊戲迴圈
+show_init = True
 running = True
 while running:
+    if show_init:
+        draw_init()
+        show_init = False
+        all_sprites = pygame.sprite.Group()
+        ducks = pygame.sprite.Group()
+        bullets = pygame.sprite.Group()
+        doctorpans = pygame.sprite.Group()
+        powers = pygame.sprite.Group()
+        player = Player()
+        all_sprites.add(player)
+        for i in range(8):
+            new_duck()
+        for i in range(2):
+            new_doctorpan()
+        score = 0
+
     clock.tick(FPS)
     #取得輸入
     for event in pygame.event.get():
@@ -355,7 +389,7 @@ while running:
             player.lives -= 1
             player.health = 100
             player.hide()
-            #running = False
+
 
 
     hits = pygame.sprite.spritecollide(player, ducks, True, pygame.sprite.collide_circle)
@@ -371,11 +405,11 @@ while running:
             player.lives -= 1
             player.health = 100
             player.hide()
-            #running = False
+            
 
     hits = pygame.sprite.spritecollide(player, powers, True)
     for hit in hits:
-        if hit.type == 'shield':
+        if hit.type == 'heart':
             player.health += 20
             if player.health > 100:
                 player.health = 100
@@ -386,8 +420,8 @@ while running:
 
 
     if player.lives == 0 and not(death_expl.alive()):
-        running = False
-        
+        show_init = True
+
     #畫面顯示
     screen.fill(BLACK)
     screen.blit(background_img, (0,0))
