@@ -1,7 +1,8 @@
 import pygame
 import random
 import os
-
+import sys
+# 定義基礎數值
 FPS = 60
 WHITE = (255, 255, 255)
 GREEN = (0, 255, 0)
@@ -12,19 +13,19 @@ WIDTH = 500
 HEIGHT = 600
 
 
-#遊戲初始化跟創建視窗
+# 遊戲初始化跟創建視窗
 pygame.init()
 pygame.mixer.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("第一個遊戲")
 clock = pygame.time.Clock()
 
-#載入圖片
+# 載入圖片
 background_img = pygame.image.load(os.path.join("img1", "background.jpg")).convert()
 player_img = pygame.image.load(os.path.join("img1", "player.png")).convert()
 player_mini_img = pygame.transform.scale(player_img, (25, 19))
 player_mini_img.set_colorkey(BLACK)
-#rock_img = pygame.image.load(os.path.join("img", "rock.png")).convert()
+# rock_img = pygame.image.load(os.path.join("img", "rock.png")).convert()
 bullet_img = pygame.image.load(os.path.join("img1", "bullet.png")).convert()
 duck_imgs = []
 for i in range(7):
@@ -55,7 +56,7 @@ power_imgs['shield'] = pygame.image.load(os.path.join("img1", "shield.png")).con
 
 
 
-#載入音樂
+# 載入音樂跟特效音
 shoot_sound = pygame.mixer.Sound(os.path.join("sound", "shoot.wav"))
 gun_sound = pygame.mixer.Sound(os.path.join("sound", "pow1.wav"))
 shield_sound = pygame.mixer.Sound(os.path.join("sound", "pow0.wav"))
@@ -65,9 +66,9 @@ expl_sounds = [
     pygame.mixer.Sound(os.path.join("sound", "expl1.wav"))
 ]
 pygame.mixer.music.load(os.path.join("sound", "background.ogg"))
-pygame.mixer.music.set_volume(0)
+pygame.mixer.music.set_volume(0.2)
 
-
+# 新增文字
 font_name = os.path.join("font.ttf")
 def draw_text(surf, text, size, x, y):
     font = pygame.font.Font(font_name, size)
@@ -76,11 +77,12 @@ def draw_text(surf, text, size, x, y):
     text_rect.centerx = x
     text_rect.top = y
     surf.blit(text_surface, text_rect)
-
+# 建立初始畫面
 def draw_init():
     screen.blit(background_img, (0, 0))
-    draw_text(screen, '太空生存戰!', 64, WIDTH / 2, HEIGHT / 4)
-    draw_text(screen, 'wasd移動飛船 空白鍵發射子彈~', 22, WIDTH / 2, HEIGHT / 2)
+    draw_text(screen, '一比一比鴨鴨!', 64, WIDTH / 2, HEIGHT / 4)
+    draw_text(screen, 'wasd移動蓮蓬頭 空白鍵發射水滴~', 22, WIDTH / 2, HEIGHT / 2)
+    draw_text(screen, '碰到鴨子或射到致遠會扣血量', 22, WIDTH / 2, HEIGHT * 3 / 5)
     draw_text(screen, '按任意鍵開始遊戲!', 18, WIDTH / 2, HEIGHT * 3 / 4)
     pygame.display.update()
     waiting = True
@@ -94,17 +96,17 @@ def draw_init():
             elif event.type == pygame.KEYUP:
                 waiting = False
                 return False
-
+# 新增鴨子
 def new_duck():
     d = Duck()
     all_sprites.add(d)
     ducks.add(d)
-
+# 新增致遠
 def new_doctorpan():
     dr = DoctorPan()
     all_sprites.add(dr)
     doctorpans.add(dr)
-
+# 畫血量
 def draw_health(surf, hp, x, y):
     if hp < 0:
         hp = 0
@@ -115,7 +117,7 @@ def draw_health(surf, hp, x, y):
     fill_rect = pygame.Rect(x, y, fill, BAR_HEIGHT)
     pygame.draw.rect(surf, GREEN, fill_rect)
     pygame.draw.rect(surf, WHITE, outline_rect, 2)
-
+# 畫生命
 def draw_lives(surf, lives, img, x, y):
     for i in range(lives):
         img_rect = img.get_rect()
@@ -124,7 +126,7 @@ def draw_lives(surf, lives, img, x, y):
         surf.blit(img, img_rect)
 
 
-
+# 玩家物件
 class Player(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
@@ -207,7 +209,7 @@ class Player(pygame.sprite.Sprite):
 
 
 
-
+# 鴨子物件
 class Duck(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
@@ -241,7 +243,7 @@ class Duck(pygame.sprite.Sprite):
             self.rect.y = random.randrange(-100, -40)
             self.speedy = random.randrange(2, 10)
             self.speedx = random.randrange(-3, 3)
-
+# 潘志遠物件
 class DoctorPan(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
@@ -275,7 +277,7 @@ class DoctorPan(pygame.sprite.Sprite):
             self.rect.y = random.randrange(-100, -40)
             self.speedy = random.randrange(2, 10)
             self.speedx = random.randrange(-3, 3)
-
+# 水滴物件
 class Bullet(pygame.sprite.Sprite):
     def __init__(self, x, y):
         pygame.sprite.Sprite.__init__(self)
@@ -291,7 +293,7 @@ class Bullet(pygame.sprite.Sprite):
         self.rect.y += self.speedy
         if self.rect.bottom < 0:
             self.kill()
-
+# 爆炸特效
 class Explosion(pygame.sprite.Sprite):
     def __init__(self, center, size):
         pygame.sprite.Sprite.__init__(self)
@@ -315,7 +317,7 @@ class Explosion(pygame.sprite.Sprite):
                 center = self.rect.center
                 self.rect = self.image.get_rect()
                 self.rect.center = center
-
+# 道具物件
 class Power(pygame.sprite.Sprite):
     def __init__(self, center):
         pygame.sprite.Sprite.__init__(self)
@@ -337,7 +339,7 @@ class Power(pygame.sprite.Sprite):
 pygame.mixer.music.play(-1)
 
 
-#遊戲迴圈
+# 遊戲迴圈
 show_init = True
 running = True
 while running:
@@ -358,7 +360,7 @@ while running:
         score = 0
 
     clock.tick(FPS)
-    #取得輸入
+    # 取得輸入
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
@@ -366,7 +368,7 @@ while running:
             if event.key == pygame.K_SPACE:
                 player.shoot()
 
-    #更新遊戲
+    # 更新遊戲
     all_sprites.update()
     hits = pygame.sprite.groupcollide(ducks, bullets, True, True)
     for hit in hits:
@@ -374,12 +376,12 @@ while running:
         score += hit.radius
         expl = Explosion(hit.rect.center, 'lg')
         all_sprites.add(expl)
-        if random.random() > 0.85:
+        if random.random() > 0.9:
             pow = Power(hit.rect.center)
             all_sprites.add(pow)
             powers.add(pow)
         new_duck()
-
+# 判斷致遠跟子彈的碰撞
     hits = pygame.sprite.groupcollide(doctorpans, bullets, True, True)
     for hit in hits:
         random.choice(expl_sounds).play()
@@ -387,7 +389,7 @@ while running:
         expl = Explosion(hit.rect.center, 'lg')
         all_sprites.add(expl)
         new_doctorpan()
-        player.health -= hit.radius/7
+        player.health -= hit.radius/5
         if player.health <= 0:
             death_expl = Explosion(player.rect.center, 'player')
             all_sprites.add(death_expl)
@@ -397,7 +399,7 @@ while running:
             player.hide()
 
 
-
+# 判斷玩家跟鴨子的碰撞
     hits = pygame.sprite.spritecollide(player, ducks, True, pygame.sprite.collide_circle)
     for hit in hits:
         new_duck()
@@ -412,7 +414,7 @@ while running:
             player.health = 100
             player.hide()
 
-
+# 判斷玩家跟道具的碰撞
     hits = pygame.sprite.spritecollide(player, powers, True)
     for hit in hits:
         if hit.type == 'heart':
@@ -429,7 +431,7 @@ while running:
     if player.lives == 0 and not(death_expl.alive()):
         show_init = True
 
-    #畫面顯示
+    # 畫面顯示
     screen.fill(BLACK)
     screen.blit(background_img, (0,0))
     all_sprites.draw(screen)
@@ -438,5 +440,6 @@ while running:
     draw_lives(screen, player.lives, player_mini_img, WIDTH - 100, 15)
     pygame.display.update()
 
-pygame.quit()
+pygame.QUIT
+sys.exit(0)
 

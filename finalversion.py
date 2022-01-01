@@ -357,4 +357,4 @@ while running:
     draw_lives(screen, player.lives, player_mini_img, WIDTH - 100, 15)
     pygame.display.update()
 
-pygame.quit()
+    pygame.quit()
