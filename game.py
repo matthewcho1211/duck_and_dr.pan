@@ -1,7 +1,7 @@
 import pygame
 import random
 import os
-import sys
+
 # 定義基礎數值
 FPS = 60
 WHITE = (255, 255, 255)
@@ -344,7 +344,9 @@ show_init = True
 running = True
 while running:
     if show_init:
-        draw_init()
+        close = draw_init()
+        if close:
+            break
         show_init = False
         all_sprites = pygame.sprite.Group()
         ducks = pygame.sprite.Group()
@@ -440,6 +442,7 @@ while running:
     draw_lives(screen, player.lives, player_mini_img, WIDTH - 100, 15)
     pygame.display.update()
 
-pygame.QUIT
-sys.exit(0)
+
+pygame.quit()
+
 
