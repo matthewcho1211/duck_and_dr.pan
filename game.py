@@ -50,6 +50,9 @@ for i in range(9):
 power_imgs = {}
 power_imgs['heart'] = pygame.image.load(os.path.join("img", "heart.png")).convert()
 power_imgs['gun'] = pygame.image.load(os.path.join("img", "gun.png")).convert()
+power_imgs['shield'] = pygame.image.load(os.path.join("img1", "shield.png")).convert()
+
+
 
 
 #載入音樂
@@ -62,7 +65,7 @@ expl_sounds = [
     pygame.mixer.Sound(os.path.join("sound", "expl1.wav"))
 ]
 pygame.mixer.music.load(os.path.join("sound", "background.ogg"))
-pygame.mixer.music.set_volume(0.4)
+pygame.mixer.music.set_volume(0)
 
 
 font_name = os.path.join("font.ttf")
@@ -141,6 +144,7 @@ class Player(pygame.sprite.Sprite):
         self.gun_time = 0
 
 
+
     def update(self):
         now = pygame.time.get_ticks()
         if self.gun > 1 and now - self.gun_time > 5000:
@@ -198,6 +202,8 @@ class Player(pygame.sprite.Sprite):
     def gunup(self):
         self.gun += 1
         self.gun_time = pygame.time.get_ticks()
+
+
 
 
 
@@ -313,7 +319,7 @@ class Explosion(pygame.sprite.Sprite):
 class Power(pygame.sprite.Sprite):
     def __init__(self, center):
         pygame.sprite.Sprite.__init__(self)
-        self.type = random.choice(['heart', 'gun'])
+        self.type = random.choice(['heart', 'gun', 'shield'])
         self.image = power_imgs[self.type]
         self.image.set_colorkey(BLACK)
         self.rect = self.image.get_rect()
@@ -347,7 +353,7 @@ while running:
         all_sprites.add(player)
         for i in range(8):
             new_duck()
-        for i in range(2):
+        for i in range(1):
             new_doctorpan()
         score = 0
 
@@ -368,7 +374,7 @@ while running:
         score += hit.radius
         expl = Explosion(hit.rect.center, 'lg')
         all_sprites.add(expl)
-        if random.random() > 0.9:
+        if random.random() > 0.85:
             pow = Power(hit.rect.center)
             all_sprites.add(pow)
             powers.add(pow)
@@ -381,7 +387,7 @@ while running:
         expl = Explosion(hit.rect.center, 'lg')
         all_sprites.add(expl)
         new_doctorpan()
-        player.health -= hit.radius/5
+        player.health -= hit.radius/7
         if player.health <= 0:
             death_expl = Explosion(player.rect.center, 'player')
             all_sprites.add(death_expl)
@@ -405,18 +411,19 @@ while running:
             player.lives -= 1
             player.health = 100
             player.hide()
-            
+
 
     hits = pygame.sprite.spritecollide(player, powers, True)
     for hit in hits:
         if hit.type == 'heart':
-            player.health += 20
-            if player.health > 100:
-                player.health = 100
+            if player.health < 100:
+                player.health += 30
             shield_sound.play()
         elif hit.type == 'gun':
             player.gunup()
             gun_sound.play()
+        elif hit.type == 'shield':
+            player.health += 20
 
 
     if player.lives == 0 and not(death_expl.alive()):
