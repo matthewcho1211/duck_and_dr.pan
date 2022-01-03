@@ -65,7 +65,7 @@ expl_sounds = [
     pygame.mixer.Sound(os.path.join("sound", "expl0.wav")),
     pygame.mixer.Sound(os.path.join("sound", "expl1.wav"))
 ]
-pygame.mixer.music.load(os.path.join("sound", "background.ogg"))
+pygame.mixer.music.load(os.path.join("sound", "Way Back then.mp3"))
 pygame.mixer.music.set_volume(0.2)
 
 # 新增文字
@@ -83,7 +83,7 @@ def draw_init():
     draw_text(screen, '一比一比鴨鴨!', 64, WIDTH / 2, HEIGHT / 4)
     draw_text(screen, 'wasd移動蓮蓬頭 空白鍵發射水滴~', 22, WIDTH / 2, HEIGHT / 2)
     draw_text(screen, '碰到鴨子或射到致遠會扣血量', 22, WIDTH / 2, HEIGHT * 3 / 5)
-    draw_text(screen, '按任意鍵開始遊戲!', 18, WIDTH / 2, HEIGHT * 3 / 4)
+    draw_text(screen, '按任意鍵開始遊戲! 開心玩喔~~', 18, WIDTH / 2, HEIGHT * 3 / 4)
     pygame.display.update()
     waiting = True
     while waiting:
@@ -253,9 +253,9 @@ class DoctorPan(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.radius = int(self.rect.width * 0.85/2)
         self.rect.x = random.randrange(0, WIDTH - self.rect.width)
-        self.rect.y = random.randrange(-180, -100)
-        self.speedy = random.randrange(4, 8)
-        self.speedx = random.randrange(-5,10)
+        self.rect.y = random.randrange(-150, -90)
+        self.speedy = random.randrange(5, 9)
+        self.speedx = random.randrange(-5,8)
         self.total_degree = 0
         self.rot_degree = random.randrange(-3, 3)
 
@@ -357,7 +357,7 @@ while running:
         all_sprites.add(player)
         for i in range(8):
             new_duck()
-        for i in range(1):
+        for i in range(2):
             new_doctorpan()
         score = 0
 
