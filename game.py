@@ -204,11 +204,6 @@ class Player(pygame.sprite.Sprite):
     def gunup(self):
         self.gun += 1
         self.gun_time = pygame.time.get_ticks()
-
-
-
-
-
 # 鴨子物件
 class Duck(pygame.sprite.Sprite):
     def __init__(self):
