@@ -417,6 +417,8 @@ while running:
         if hit.type == 'heart':
             if player.health < 100:
                 player.health += 30
+                if player.health > 100:
+                    player.health = 100
             shield_sound.play()
         elif hit.type == 'gun':
             player.gunup()
